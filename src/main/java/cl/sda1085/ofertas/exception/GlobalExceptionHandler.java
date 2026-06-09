@@ -18,24 +18,24 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationErrors(MethodArgumentNotValidException ex) {
         log.error("Error de validación detectado: {}", ex.getMessage());
-
         Map<String, String> errores = new LinkedHashMap<>();
 
         ex.getBindingResult().getFieldErrors().forEach(error ->
+                errores.put(error.getField(), error.getDefaultMessage()));  //Usamos merge por si un mismo campo tiene varios errores
 
-                errores.put(error.getField(), error.getDefaultMessage()));  //Usamos merge por si un mismo campo tiene varios errores (ej: @NotNull y @Min)
         return ResponseEntity.badRequest().body(errores);
     }
 
     //Errores de lógica de negocio (RuntimeException personalizados)
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
+
         log.error("Ocurrió un error de negocio {} - Tipo: {}", ex.getMessage(), ex.getClass().getName());
         Map<String, String> error = new LinkedHashMap<>();
 
-        // Agregamos una llave descriptiva para que el JSON sea más claro
-        error.put("mensaje", ex.getMessage());
-        error.put("tipo", "Error de Negocio");
+        //Agregamos una llave descriptiva para que el JSON sea más claro
+        error.put("MENSAJE", ex.getMessage());
+        error.put("TIPO", "Error de Negocio");
 
         return ResponseEntity.badRequest().body(error);
     }

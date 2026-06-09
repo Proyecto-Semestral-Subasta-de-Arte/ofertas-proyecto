@@ -32,7 +32,6 @@ public class OfertaService {
 
     //Método de apoyo para encapsulamiento de datos
     private OfertaResponseDTO mapToResponseDTO(Oferta oferta) {
-
         return new OfertaResponseDTO(
                 oferta.getId(),
                 oferta.getMonto(),
@@ -44,9 +43,10 @@ public class OfertaService {
 
     //Obtener todas las ofertas
     public List<OfertaResponseDTO> obtenerTodas() {
-        log.info("Iniciando recuperación de todas las ofertas");
+        log.info("Iniciando recuperación de todas las ofertas.");
+
         List<Oferta> ofertas = ofertaRepository.findAll();
-        log.debug("Se recuperaron"+ ofertas.size() + "ofertas de la base de datos");
+        log.debug("Se recuperaron" + ofertas.size() + "ofertas de la base de datos.");
 
         return ofertas.stream()
                 .map(this::mapToResponseDTO)
@@ -61,29 +61,27 @@ public class OfertaService {
                     return mapToResponseDTO(oferta);
                 })
                 .or(() -> {
-                    log.warn("No s encontró la oferta con ID: {}", id);
+                    log.warn("No se encontró la oferta con ID: {}", id);
                     return  Optional.empty();
                 });
     }
 
     //Guardar (crear) oferta
     public OfertaResponseDTO guardar(OfertaRequestDTO dto) {
-
         log.info("Registrando nueva oferta: Monto {} para la subasta ID {} por el usuario ID {}",
                 dto.getMonto(), dto.getIdSubasta(), dto.getIdUsuario());
 
-        // 1. Validar que el usuario existe
+        //Validar que el usuario existe
         usuarioClient.obtenerUsuarioPorId(dto.getIdUsuario());
 
-        // 2. Validar que la subasta existe
+        //Validar que la subasta existe
         subastaClient.obtenerSubastaPorId(dto.getIdSubasta());
-
 
         Oferta oferta = new Oferta();
         oferta.setMonto(dto.getMonto());
         oferta.setIdUsuario(dto.getIdUsuario());
-        oferta.setIdSubasta(dto.getIdSubasta());  //IMPORTANTE: La oferta suele ligarse al ID de la SUBASTA
-        oferta.setFechaHora(LocalDateTime.now());  //Registro del momento exacto de la puja
+        oferta.setIdSubasta(dto.getIdSubasta());  //La oferta suele ligarse al ID de la SUBASTA.
+        oferta.setFechaHora(LocalDateTime.now());  //Registro del momento exacto de la puja.
 
         Oferta ofertaGuardada = ofertaRepository.save(oferta);
         log.debug("Oferta guardada exitosamente con ID: {}", ofertaGuardada.getId());
@@ -93,12 +91,10 @@ public class OfertaService {
 
     //Actualizar oferta
     public Optional<OfertaResponseDTO> actualizar(Long id, OfertaRequestDTO dto){
-        log.info("Iniciando actualización para la oferta con ID: {}", id);
-
+        log.info("Iniciando actualización de la oferta con ID: {}", id);
 
         return ofertaRepository.findById(id)
                 .map(ofertaExistente -> {
-
                             log.debug("Oferta encontrada. Actualizando monto de {} a {}",
                                     ofertaExistente.getMonto(), dto.getMonto());
 
@@ -109,17 +105,17 @@ public class OfertaService {
                             Oferta actualizada = ofertaRepository.save(ofertaExistente);
                             log.info("Oferta ID: {} actualizada exitosamente", id);
                             return mapToResponseDTO(actualizada);
+
                         }).or(() -> {
                             log.warn("No se pudo actualizar: La oferta con ID no existe", id);
                             return Optional.empty();
                 });
-
-
     }
 
     //Eliminar oferta
     public void eliminar(Long id) {
         log.info("Intentando eliminar la oferta con ID: {}", id);
+
         if (ofertaRepository.existsById(id)) {
             ofertaRepository.deleteById(id);
             log.info("Oferta con ID: {} eliminada correctamente", id);
@@ -150,47 +146,53 @@ public class OfertaService {
     //Buscar ofertas de un usuario específico
     public List<OfertaResponseDTO> obtenerOfertasPorUsuario(Long idUsuario) {
         log.info("Buscando ofertas del usuario ID: {}", idUsuario);
+
         List<Oferta> ofertas = ofertaRepository.findByIdUsuario(idUsuario);
-        log.debug("El usuario " + idUsuario + "tiene" + ofertas.size() + "oferta registradas");
+        log.debug("El usuario " + idUsuario + "tiene" + ofertas.size() + "oferta registradas.");
 
         return ofertas.stream()
                 .map(this::mapToResponseDTO)
                 .collect(Collectors.toList());
     }
-
 
     //Buscar ofertas que superen un monto en una subasta
     public List<OfertaResponseDTO> obtenerOfertasMayoresA(Long idSubasta, BigDecimal monto) {
         log.info("Buscando ofertas en subasta {} superiores a : {}", idSubasta, monto);
+
         List<Oferta> ofertas = ofertaRepository.findByIdSubastaAndMontoGreaterThan(idSubasta,monto);
-        log.debug("Se encontraron" + ofertas.size() + " ofertas que superan el monto" + monto);
+        log.debug("Se encontraron" + ofertas.size() + " ofertas que superan el monto" + monto + ".");
+
         return ofertas.stream()
                 .map(this::mapToResponseDTO)
                 .collect(Collectors.toList());
     }
 
-    //Contar ofertas de una subasta (Devuelve Long, no DTO)
+    //Contar ofertas de una subasta
     public Long contarOfertasPorSubasta(Long idSubasta) {
         log.info("Contando ofertas para la subasa ID: {}", idSubasta);
+
         Long total = ofertaRepository.countByIdSubasta(idSubasta);
         log.debug("Total de ofertas para la subasta {}: {}", idSubasta, total);
 
         return total;
     }
 
-    //Verificar si un usuario ya participó (Devuelve boolean)
+    //Verificar si un usuario ya participó
     public boolean verificarSiUsuarioOferto(Long idUsuario, Long idSubasta) {
         log.info("Verificando participacón del usuario {} en subasta {}", idUsuario,idSubasta);
+
         boolean existe = ofertaRepository.existsByIdUsuarioAndIdSubasta(idUsuario, idSubasta);
         log.debug("¿Usuario" + idUsuario + "ya participó?:" + existe);
+
         return existe;
     }
 
-    //Obtener el Top 3 de ofertas
+    //Obtener el TOP 3 de ofertas
     public List<OfertaResponseDTO> obtenerTop3Subasta(Long idSubasta) {
-        log.info("Recuperando el Top 3 de ofertas para la subasta ID: {}" + idSubasta );
+        log.info("Recuperando el top 3 de ofertas para la subasta ID: {}" + idSubasta + ".");
+
         List<Oferta> topOfertas = ofertaRepository.findTop3ByIdSubastaOrderByMontoDesc(idSubasta);
-        log.debug("Top 3 recuperado. Cantidad de ofertas obtenidas: " + topOfertas.size());
+        log.debug("TOP 3 recuperado. Cantidad de ofertas obtenidas: " + topOfertas.size() + ".");
 
         return topOfertas.stream()
                 .map(this::mapToResponseDTO)

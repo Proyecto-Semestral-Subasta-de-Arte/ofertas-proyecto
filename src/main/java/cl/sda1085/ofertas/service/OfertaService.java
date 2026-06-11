@@ -66,7 +66,7 @@ public class OfertaService {
                 });
     }
 
-    //Guardar (crear) oferta
+    //Guardar (crear) nueva oferta
     public OfertaResponseDTO guardar(OfertaRequestDTO dto) {
         log.info("Registrando nueva oferta: Monto {} para la subasta ID {} por el usuario ID {}",
                 dto.getMonto(), dto.getIdSubasta(), dto.getIdUsuario());
@@ -89,26 +89,33 @@ public class OfertaService {
         return mapToResponseDTO(ofertaGuardada);
     }
 
-    //Actualizar oferta
+    //Actualizar oferta existente
     public Optional<OfertaResponseDTO> actualizar(Long id, OfertaRequestDTO dto){
         log.info("Iniciando actualización de la oferta con ID: {}", id);
 
         return ofertaRepository.findById(id)
                 .map(ofertaExistente -> {
-                            log.debug("Oferta encontrada. Actualizando monto de {} a {}",
-                                    ofertaExistente.getMonto(), dto.getMonto());
+                    log.debug("Oferta encontrada. Actualizando monto de {} a {}",
+                            ofertaExistente.getMonto(), dto.getMonto());
 
-                            ofertaExistente.setMonto(dto.getMonto());
-                            ofertaExistente.setIdUsuario(dto.getIdUsuario());
-                            ofertaExistente.setIdSubasta(dto.getIdSubasta());
+                    log.info("[Validación remota] Verificando existencia del usuario ID: {} vía WebClient...", dto.getIdUsuario());
+                    usuarioClient.obtenerUsuarioPorId(dto.getIdUsuario());
 
-                            Oferta actualizada = ofertaRepository.save(ofertaExistente);
-                            log.info("Oferta ID: {} actualizada exitosamente", id);
-                            return mapToResponseDTO(actualizada);
+                    log.info("[Validación remota] Verificando existencia de la subasta ID: {} vía WebClient...", dto.getIdSubasta());
+                    subastaClient.obtenerSubastaPorId(dto.getIdSubasta());
 
-                        }).or(() -> {
-                            log.warn("No se pudo actualizar: La oferta con ID no existe", id);
-                            return Optional.empty();
+                    log.info("[Validación remota] Identificadores confirmados de manera exitosa.");
+                    ofertaExistente.setMonto(dto.getMonto());
+                    ofertaExistente.setIdUsuario(dto.getIdUsuario());
+                    ofertaExistente.setIdSubasta(dto.getIdSubasta());
+
+                    Oferta actualizada = ofertaRepository.save(ofertaExistente);
+                    log.info("Oferta ID: {} actualizada exitosamente.", id);
+                    return mapToResponseDTO(actualizada);
+
+                }).or(() -> {
+                    log.warn("No se pudo actualizar: La oferta con ID no existe.", id);
+                    return Optional.empty();
                 });
     }
 

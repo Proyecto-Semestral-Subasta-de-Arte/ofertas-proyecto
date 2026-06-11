@@ -19,7 +19,7 @@ public interface OfertaRepository extends JpaRepository<Oferta, Long> {
     //Contar cuántas ofertas se han realizado en una subasta
     Long countByIdSubasta(Long idSubasta);
 
-    //uscar ofertas que superen un monto determinado en una subasta específica
+    //Buscar ofertas que superen un monto determinado en una subasta específica
     List<Oferta> findByIdSubastaAndMontoGreaterThan(Long idSubasta, BigDecimal monto);
 
     //Verificar si un usuario ya ha realizado alguna oferta en una subasta

@@ -11,7 +11,6 @@ import java.math.BigDecimal;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class OfertaRequestDTO {
 
     @NotNull(message = "El monto es obligatorio.")

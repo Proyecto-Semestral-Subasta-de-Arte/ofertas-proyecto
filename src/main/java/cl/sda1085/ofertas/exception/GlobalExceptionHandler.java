@@ -11,7 +11,6 @@ import java.util.Map;
 
 @Slf4j
 @RestControllerAdvice
-
 public class GlobalExceptionHandler {
 
     //Errores de validación (@Valid en los DTOs)

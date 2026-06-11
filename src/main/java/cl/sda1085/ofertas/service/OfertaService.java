@@ -19,12 +19,12 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-
 public class OfertaService {
 
     private final OfertaRepository ofertaRepository;
     private final UsuarioClient usuarioClient;
     private final SubastaClient subastaClient;
+
 
     //==============================
     //CRUD estándar

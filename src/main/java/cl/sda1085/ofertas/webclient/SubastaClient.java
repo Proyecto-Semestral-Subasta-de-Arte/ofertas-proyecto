@@ -27,6 +27,6 @@ public class SubastaClient {
                 .onStatus(status -> status.is4xxClientError(),
                         response -> Mono.error(new RuntimeException("La subasta con ID " + id + " no existe o ya no se encuentra disponible.")))
                 .bodyToMono(new org.springframework.core.ParameterizedTypeReference<Map<String, Object>>() {})
-                .block(); // Bloqueo síncronizado para asegurar la regla de negocio
+                .block();  //Bloqueo síncronizado para asegurar la regla de negocio
     }
 }

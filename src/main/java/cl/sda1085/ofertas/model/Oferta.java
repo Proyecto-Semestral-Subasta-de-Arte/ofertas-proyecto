@@ -15,7 +15,6 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
 public class Oferta {
 
     @Id
@@ -28,9 +27,9 @@ public class Oferta {
     @Column(nullable = false)
     private LocalDateTime fechaHora;
 
-    @Column(nullable = false)
+    @Column(name = "id_usuario", nullable = false)
     private Long idUsuario;
 
-    @Column(nullable = false)
+    @Column(name = "id_subasta", nullable = false)
     private Long idSubasta;
 }

@@ -23,6 +23,7 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RestController
 @RequestMapping("/api/ofertas")
 @RequiredArgsConstructor
+@CrossOrigin(origins = "*")
 @Tag(name = "Ofertas", description = "Controlador para el seguimiento y registro de pujas de arte.")
 
 public class OfertaController {
